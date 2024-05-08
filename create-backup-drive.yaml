@@ -44,3 +44,6 @@
       - Archive
       - Computer
       - ComputerPhone
+  # The autobackup:main property tells zfs-autobackup (1) to backup that dataset (not the root dataset) and (2) to name that backup group "main".
+  - name: Annotate backup dataset
+    command: zfs set autobackup:main=true {{ zfs_pool }}/{{ zfs_dataset }}
