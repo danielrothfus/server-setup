@@ -1,0 +1,46 @@
+- name: Create backup drive
+  hosts: myhosts
+  vars:
+    zfs_pool: backup
+    zfs_dataset: default
+    zfs_mount_point: /backup
+  tasks:
+  - name: Confirm high-risk operation
+    pause:
+      prompt: Are you SURE you want to format the backup drive? Enter "this will destroy my data" if so
+    register: confirm_drive_format
+  - name: Check for confirmation
+    fail:
+      msg: Process aborted.
+  - name: Install zfsutils-linux package
+    apt:
+      name: zfsutils-linux
+    when: confirm_drive_format.user_input != "this will destroy my data"
+  - name: Delete any extant pool
+    command: zpool destroy {{ zfs_pool }}
+    ignore_errors: true
+  - name: Format drive
+    command: echo -e "g\nw\n" | /sbin/fdisk /dev/disk/by-id/{{ backup_drive_id }}
+  - file:
+      path: "{{ zfs_mount_point }}"
+      state: absent
+  - name: Create pool
+    command: zpool create -m none -o ashift=14 -O atime=off -O compression=lz4 -O dedup=on -O canmount=off {{ zfs_pool }} /dev/disk/by-id/{{ backup_drive_id }}
+  - name: Create dataset
+    command: zfs create -o mountpoint={{ zfs_mount_point }} {{ zfs_pool }}/{{ zfs_dataset }}
+  - name: Change backup mount owner
+    file:
+      path: "{{ zfs_mount_point }}"
+      owner: danielrothfus
+      group: danielrothfus
+      recurse: true
+  - name: Create backup subdirectories
+    become: yes
+    become_user: danielrothfus
+    file:
+      path: "/{{ zfs_mount_point }}/{{ item }}"
+      state: directory
+    with_items:
+      - Archive
+      - Computer
+      - ComputerPhone

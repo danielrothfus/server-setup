@@ -1,0 +1,5 @@
+myhosts:
+  hosts:
+    srv1.danielrothfus.com:
+      ansible_become: true
+      ansible_become_method: su

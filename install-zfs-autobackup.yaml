@@ -1,0 +1,28 @@
+- name: Install zfs_autobackup
+  hosts: myhosts
+  tasks:
+  - name: Install pipx
+    apt:
+      name: pipx
+  - name: Install zfs_autobackup
+    command: pipx install zfs-autobackup
+  - name: Set path in profile
+    lineinfile:
+      dest: ~root/.bashrc
+      insertafter: EOF
+      line: "export PATH=$PATH:/root/.local/bin"
+  - name: Annotate backup dataset
+    command: zfs set autobackup:main=true backup
+  - name: Create hourly backup job
+    ansible.builtin.cron:
+      name: "hourly zfs-autobackup"
+      special_time: hourly
+      job: zfs-autobackup -v main --keep-source=10,1d1w,1w1m,1m1y
+
+#
+
+
+# Manual steps:
+# - Copy over config from Sync/Config/srv<x>-syncthing
+# - Set up .stignore to #include .stignore-shared
+# - Link .config/syncthing to synced /backup/Computer/Config/srv<x>-syncthing

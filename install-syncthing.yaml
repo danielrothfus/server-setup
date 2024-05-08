@@ -1,0 +1,16 @@
+- name: Install Syncthing
+  hosts: myhosts
+  tasks:
+  - name: Install Syncthing package
+    apt:
+      name: syncthing
+  - name: Enable Syncthing service
+    ansible.builtin.systemd_service:
+      name: syncthing@danielrothfus
+      enabled: true
+      state: started
+
+# Manual steps:
+# - Copy over config from Sync/Config/srv<x>-syncthing
+# - Set up .stignore to #include .stignore-shared
+# - Link .config/syncthing to synced /backup/Computer/Config/srv<x>-syncthing
