@@ -17,7 +17,7 @@
       name: "hourly zfs-autobackup"
       special_time: hourly
       # Have to escape "%" otherwise cron will take it as a newline - https://en.wikipedia.org/wiki/Cron
-      job: bash -c '/root/.local/bin/zfs-autobackup -v main --keep-source=10,1d1w,1w1m,1m1y --snapshot-format "{}-\%Y-\%m-\%dT\%H:\%M:\%S" 2>&1 | logger -t zfs-autobackup'
+      job: bash -c '/root/.local/bin/zfs-autobackup -v main --keep-source=1h1d,1d1w,1w1m,1m1y,1y1000y --snapshot-format "{}-\%Y-\%m-\%dT\%H:\%M:\%S" 2>&1 | logger -t zfs-autobackup'
   - name: Restart cron
     service:
       name: cron
